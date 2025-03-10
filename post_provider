@@ -1,0 +1,38 @@
+import 'package:flutter/material.dart';
+import 'api_service.dart';
+
+class PostProvider with ChangeNotifier {
+  final ApiService apiService = ApiService();
+  List<dynamic> _posts = [];
+  bool _isLoading = false;
+
+  List<dynamic> get posts => _posts;
+  bool get isLoading => _isLoading;
+
+  // Fetch all posts
+  Future<void> fetchPosts() async {
+    _isLoading = true;
+    notifyListeners();
+    _posts = await apiService.fetchPosts();
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  // Add a new post
+  Future<void> addPost(String title, String body) async {
+    await apiService.addPost(title, body);
+    fetchPosts();
+  }
+
+  // Update an existing post
+  Future<void> updatePost(int id, String title, String body) async {
+    await apiService.updatePost(id, title, body);
+    fetchPosts();
+  }
+
+  // Delete a post
+  Future<void> deletePost(int id) async {
+    await apiService.deletePost(id);
+    fetchPosts();
+  }
+}
