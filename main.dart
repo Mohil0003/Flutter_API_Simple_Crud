@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'post_provider.dart';
+import 'package:untitled/post_provider.dart';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => PostProvider()..fetchPosts(),
+      create: (context) => PostProvider()..loadPosts(),
       child: MyApp(),
     ),
   );
@@ -14,29 +14,26 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: PostScreen(),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: PostScreen());
   }
 }
 
 class PostScreen extends StatelessWidget {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController bodyController = TextEditingController();
+  final titleController = TextEditingController();
+  final bodyController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final postProvider = Provider.of<PostProvider>(context);
+    final provider = Provider.of<PostProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Mock API CRUD')),
-      body: postProvider.isLoading
+      appBar: AppBar(title: Text('CRUD with Mock API')),
+      body: provider.posts.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
-        itemCount: postProvider.posts.length,
+        itemCount: provider.posts.length,
         itemBuilder: (context, index) {
-          final post = postProvider.posts[index];
+          final post = provider.posts[index];
           return ListTile(
             title: Text(post['title']),
             subtitle: Text(post['body']),
@@ -48,12 +45,12 @@ class PostScreen extends StatelessWidget {
                   onPressed: () {
                     titleController.text = post['title'];
                     bodyController.text = post['body'];
-                    showFormDialog(context, postProvider, post['id']);
+                    showForm(context, provider, post['id']);
                   },
                 ),
                 IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => postProvider.deletePost(post['id']),
+                  onPressed: () => provider.deletePost(post['id']),
                 ),
               ],
             ),
@@ -62,12 +59,12 @@ class PostScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () => showFormDialog(context, postProvider, null),
+        onPressed: () => showForm(context, provider, null),
       ),
     );
   }
 
-  void showFormDialog(BuildContext context, PostProvider provider, int? id) {
+  void showForm(BuildContext context, PostProvider provider, String? id) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -80,10 +77,7 @@ class PostScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
-          ),
+          TextButton(child: Text('Cancel'), onPressed: () => Navigator.pop(context)),
           TextButton(
             child: Text('Save'),
             onPressed: () {
