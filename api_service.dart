@@ -2,47 +2,29 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = 'https://jsonplaceholder.typicode.com/posts';
-
-  // Fetch all posts
-  Future<List<dynamic>> fetchPosts() async {
+  final String baseUrl = 'https://67cf27ef823da0212a81a556.mockapi.io/posts';
+  Future<List<dynamic>> getPosts() async {
     final response = await http.get(Uri.parse(baseUrl));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load posts');
-    }
+    return response.statusCode == 200 ? json.decode(response.body) : [];
   }
 
-  // Create a new post
   Future<void> addPost(String title, String body) async {
-    final response = await http.post(
+    await http.post(
       Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({"title": title, "body": body, "userId": 1}),
+      body: json.encode({"title": title, "body": body}),
     );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to add post');
-    }
   }
 
-  // Update an existing post
-  Future<void> updatePost(int id, String title, String body) async {
-    final response = await http.put(
+  Future<void> updatePost(String id, String title, String body) async {
+    await http.put(
       Uri.parse('$baseUrl/$id'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({"id": id, "title": title, "body": body, "userId": 1}),
+      body: json.encode({"title": title, "body": body}),
     );
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update post');
-    }
   }
 
-  // Delete a post
-  Future<void> deletePost(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/$id'));
-    if (response.statusCode != 200) {
-      throw Exception('Failed to delete post');
-    }
+  Future<void> deletePost(String id) async {
+    await http.delete(Uri.parse('$baseUrl/$id'));
   }
 }
